@@ -1,0 +1,30 @@
+# 项目依赖
+
+# 基础科学计算
+numpy==1.26.4
+pandas==2.2.2
+openpyxl==3.1.2
+
+# 文本处理
+sacrebleu==2.4.0
+nltk==3.8.1
+rouge==1.0.1
+
+# 向量检索
+faiss-cpu==1.7.4
+
+# Embedding
+sentence-transformers==2.7.0
+transformers>=4.40.1
+accelerate>=0.25.0
+
+# 接口
+fastapi>=0.115.1,<0.116.0
+uvicorn>=0.30.0,<0.31.0
+pydantic>=2.8.0,<3.0.0
+
+# 其他
+scikit-learn==1.4.2
+jieba==0.42.1
+tqdm>=4.66.5,<5.0.0
+requests==2.31.0
