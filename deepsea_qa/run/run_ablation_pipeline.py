@@ -53,6 +53,8 @@ def _parse_args():
                    help="消融实验类型")
     
     # 消融/调参入口
+    p.add_argument("--no_cls", action="store_true")
+    p.add_argument("--no_rewrite", action="store_true")
     p.add_argument("--max_sparse", type=int, default=QueryConfig().pipeline.max_sparse_queries)
     p.add_argument("--no_rerank", action="store_true")
     p.add_argument("--no_reverse_verification", action="store_true")
