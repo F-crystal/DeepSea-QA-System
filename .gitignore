@@ -60,7 +60,6 @@ Thumbs.db
 
 # Specific files to ignore
 create_ablation_dataset.py
-eval_results_deduplicated.py
 
 # Config files with sensitive information
 config/api_keys.py

@@ -105,10 +105,17 @@ python -V
 python -m pip -V
 
 # -----------------------------
-# 8) 升级 pip
+# 8) 升级 pip (条件性)
 # -----------------------------
-echo "[INFO] Upgrading pip"
-python -m pip install --upgrade pip -i "${PYPI}" --cache-dir "${PIP_CACHE_DIR}"
+pip_version=$(python -m pip --version | awk '{print $2}')
+required_version="23.0"
+
+if [ "$(printf '%s\n' "${required_version}" "${pip_version}" | sort -V | head -n1)" != "${required_version}" ]; then
+    echo "[INFO] Upgrading pip (current: ${pip_version}, required: ${required_version})"
+    python -m pip install --upgrade pip -i "${PYPI}" --cache-dir "${PIP_CACHE_DIR}"
+else
+    echo "[INFO] pip is already up to date (${pip_version})"
+fi
 
 # -----------------------------
 # 9) 安装 PyTorch
