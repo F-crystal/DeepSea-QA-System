@@ -155,6 +155,7 @@ class GenerationPipeline:
         query: str,
         query_bundle: Dict[str, Any],
         retrieval_result: Dict[str, Any],
+        draft_answer: Optional[str] = None,
     ) -> GenerationResult:
         cur_rr = retrieval_result
         last_ans_json: Dict[str, Any] = {}
@@ -174,7 +175,9 @@ class GenerationPipeline:
                 llm_settings=self.llm_settings,
                 max_evidence=self.cfg.max_evidence,
                 cfg=self.cfg,
+                draft_answer=draft_answer,
             )
+            ans_json["query"] = query
 
             # 2) refs（GB/T）
             refs_gbt = self._attach_refs(ans_json, meta_map)

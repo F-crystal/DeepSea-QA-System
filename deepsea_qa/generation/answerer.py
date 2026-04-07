@@ -113,6 +113,7 @@ def generate_structured_answer_json(
     llm_settings: LLMSettings,
     max_evidence: int = 6,
     cfg: Optional[GenerationConfig] = None,
+    draft_answer: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     生成严格 JSON（用于闭环验证）：
@@ -144,6 +145,14 @@ def generate_structured_answer_json(
             ]
         }
     }
+
+    draft_answer = (draft_answer or "").strip()
+    if draft_answer:
+        user_obj["draft_answer"] = draft_answer
+        user_obj["draft_answer_instruction"] = (
+            "draft_answer 是已经展示给用户的答案草稿。请在证据支持范围内尽量保留其表述和结构，"
+            "只做最小必要修正，并按 output_schema 输出。"
+        )
 
     # 关键：response_format json_object
     r = llm.chat(
