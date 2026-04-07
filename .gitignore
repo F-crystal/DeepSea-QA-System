@@ -37,6 +37,7 @@ ENV/
 Thumbs.db
 
 # Data files (隐私数据不上传)
+*.md
 *.jsonl
 *.json
 *.xlsx
@@ -57,6 +58,10 @@ Thumbs.db
 *.sqlite
 !requirements.txt
 !README.md
+
+# agent files
+openspec/
+.codex/
 
 # Specific files to ignore
 create_ablation_dataset.py
