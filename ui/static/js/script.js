@@ -29,6 +29,26 @@ function setupTabs() {
     });
 }
 
+function appendProcessStep(container, text, className = '') {
+    const line = document.createElement('p');
+    if (className) {
+        line.className = className;
+    }
+    line.textContent = text;
+    container.appendChild(line);
+    return line;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+}
+
+function formatAnswerHtml(answer) {
+    return escapeHtml(answer).replace(/\n/g, '<br>');
+}
+
 // 单个问题处理
 function setupSingleQuery() {
     const submitButton = document.getElementById('submit-query');
@@ -57,9 +77,6 @@ function setupSingleQuery() {
         processStepsDiv.innerHTML = '<p>正在处理...</p>';
         
         // 流式处理请求
-        let answer = '';
-        let evidenceList = [];
-        
         fetch('/api/qa/stream', {
             method: 'POST',
             headers: {
@@ -97,41 +114,24 @@ function setupSingleQuery() {
                                 const data = JSON.parse(dataStr);
                                 
                                 if (data.event === 'evidence') {
-                                    // 处理证据
-                                    evidenceList.push(data);
-                                    processStepsDiv.innerHTML += `<p>📄 加载证据 ${data.idx}: ${data.title}</p>`;
+                                    appendProcessStep(processStepsDiv, `加载证据 ${data.idx}: ${data.title || '未命名文献'}`);
                                 } else if (data.event === 'answer_delta') {
-                                    // 处理答案增量（草稿），显示在思考过程中
-                                    answer += data.delta;
-                                    // 检查是否已经有生成中的行
                                     let generatingLine = processStepsDiv.querySelector('.generating-line');
                                     if (!generatingLine) {
-                                        generatingLine = document.createElement('p');
-                                        generatingLine.className = 'generating-line';
-                                        generatingLine.innerHTML = '💭 生成中：';
-                                        processStepsDiv.appendChild(generatingLine);
+                                        generatingLine = appendProcessStep(processStepsDiv, '生成中：', 'generating-line');
                                     }
-                                    // 在同一行内追加内容，过滤掉chunk_id信息和处理#号
-                                    let filteredDelta = data.delta.replace(/\(chunk_id=[^)]*\)/g, '');
-                                    // 将#号替换为更美观的标题格式
-                                    filteredDelta = filteredDelta.replace(/#{1,6}\s+(.*?)(?=\n|$)/g, '<strong>$1</strong><br>');
-                                    generatingLine.innerHTML += filteredDelta;
+                                    const filteredDelta = String(data.delta || '').replace(/\(chunk_id=[^)]*\)/g, '');
+                                    generatingLine.textContent += filteredDelta;
                                 } else if (data.event === 'done') {
-                                    // 草稿完成
-                                    processStepsDiv.innerHTML += '<p>✏️ 生成草稿完成</p>';
-                                    // 添加中间状态提示
-                                    processStepsDiv.innerHTML += '<p>🔍 正在验证答案并生成最终结果...</p>';
+                                    appendProcessStep(processStepsDiv, '生成草稿完成');
+                                    appendProcessStep(processStepsDiv, '正在验证答案并生成最终结果...');
                                 } else if (data.event === 'final') {
-                                    // 最终结果，显示在回答结果部分
-                                    processStepsDiv.innerHTML += '<p>✅ 处理完成</p>';
-                                    processStepsDiv.innerHTML += '<p>📋 正在格式化参考文献...</p>';
-                                    // 延迟显示最终结果，让用户有时间看到处理过程
+                                    appendProcessStep(processStepsDiv, '处理完成');
+                                    appendProcessStep(processStepsDiv, '正在格式化参考文献...');
                                     setTimeout(() => {
-                                        // 处理最终答案和参考文献
                                         const finalData = data.data;
                                         const generation = finalData.generation;
                                         
-                                        // 显示最终答案，添加引用角标，过滤掉chunk_id信息
                                         let filteredAnswer = generation.answer.replace(/\(chunk_id=[^)]*\)/g, '');
                                         const formattedAnswer = addCitationMarkers(filteredAnswer, generation.citations);
                                         answerDiv.innerHTML = formattedAnswer;
@@ -139,26 +139,24 @@ function setupSingleQuery() {
                                         // 保存到历史记录
                                         saveToHistory(query, filteredAnswer);
                                         
-                                        // 显示参考文献列表
                                         if (generation.refs_gbt && generation.refs_gbt.length > 0) {
-                                            let refsHtml = '<ol>';
-                                            generation.refs_gbt.forEach((ref, index) => {
-                                                refsHtml += `<li>${ref}</li>`;
+                                            const refsOl = document.createElement('ol');
+                                            generation.refs_gbt.forEach(ref => {
+                                                const li = document.createElement('li');
+                                                li.textContent = ref;
+                                                refsOl.appendChild(li);
                                             });
-                                            refsHtml += '</ol>';
-                                            refsListDiv.innerHTML = refsHtml;
+                                            refsListDiv.replaceChildren(refsOl);
                                         } else {
-                                            refsListDiv.innerHTML = '<p>无参考文献</p>';
+                                            refsListDiv.textContent = '无参考文献';
                                         }
                                         
-                                        // 5秒后隐藏状态
                                         setTimeout(() => {
                                             statusDiv.classList.add('hidden');
                                         }, 5000);
                                     }, 1000);
                                 } else if (data.event === 'error') {
-                                    // 错误处理
-                                    processStepsDiv.innerHTML = `<p style="color: red;">错误：${data.message}</p>`;
+                                    processStepsDiv.textContent = `错误：${data.message}`;
                                 }
                             } catch (e) {
                                 console.error('解析事件数据失败:', e);
@@ -179,8 +177,7 @@ function setupSingleQuery() {
         })
         .catch(error => {
             console.error('请求失败:', error);
-            processStepsDiv.innerHTML = `<p style="color: red;">错误：${error.message}</p>`;
-            // 5秒后隐藏状态
+            processStepsDiv.textContent = `错误：${error.message}`;
             setTimeout(() => {
                 statusDiv.classList.add('hidden');
             }, 5000);
@@ -207,9 +204,11 @@ function setupBatchQuery() {
                 
                 if (questions.length > 0) {
                     batchPreview.classList.remove('hidden');
-                    questionsList.innerHTML = '';
+                    questionsList.replaceChildren();
                     questions.forEach((q, index) => {
-                        questionsList.innerHTML += `<p>${index + 1}. ${q}</p>`;
+                        const line = document.createElement('p');
+                        line.textContent = `${index + 1}. ${q}`;
+                        questionsList.appendChild(line);
                     });
                 } else {
                     batchPreview.classList.add('hidden');
@@ -242,43 +241,56 @@ function setupBatchQuery() {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                batchResultsContainer.innerHTML = `<p style="color: red;">错误：${data.error}</p>`;
+                batchResultsContainer.textContent = `错误：${data.error}`;
                 return;
             }
             
-            batchResultsContainer.innerHTML = '';
+            batchResultsContainer.replaceChildren();
             data.results.forEach((result, index) => {
                 const resultItem = document.createElement('div');
                 resultItem.className = 'batch-result-item';
                 
                 if (result.error) {
-                    resultItem.innerHTML = `
-                        <h4>问题 ${index + 1}: ${data.questions[index]}</h4>
-                        <p style="color: red;">错误：${result.error}</p>
-                    `;
+                    const title = document.createElement('h4');
+                    title.textContent = `问题 ${index + 1}: ${data.questions[index]}`;
+                    const errorP = document.createElement('p');
+                    errorP.style.color = 'red';
+                    errorP.textContent = `错误：${result.error}`;
+                    resultItem.appendChild(title);
+                    resultItem.appendChild(errorP);
                 } else {
                     const formattedAnswer = addCitationMarkers(result.answer, result.citations);
-                    let refsHtml = '';
+                    const title = document.createElement('h4');
+                    title.textContent = `问题 ${index + 1}: ${data.questions[index]}`;
+                    resultItem.appendChild(title);
+
+                    const answerBlock = document.createElement('div');
+                    answerBlock.className = 'batch-answer';
+                    answerBlock.innerHTML = formattedAnswer;
+                    resultItem.appendChild(answerBlock);
+
                     if (result.refs_gbt && result.refs_gbt.length > 0) {
-                        refsHtml = '<div class="batch-references"><h5>参考文献：</h5><ol>';
-                        result.refs_gbt.forEach((ref, refIndex) => {
-                            refsHtml += `<li>${ref}</li>`;
+                        const refsWrap = document.createElement('div');
+                        refsWrap.className = 'batch-references';
+                        const refsTitle = document.createElement('h5');
+                        refsTitle.textContent = '参考文献：';
+                        const refsOl = document.createElement('ol');
+                        result.refs_gbt.forEach(ref => {
+                            const li = document.createElement('li');
+                            li.textContent = ref;
+                            refsOl.appendChild(li);
                         });
-                        refsHtml += '</ol></div>';
+                        refsWrap.appendChild(refsTitle);
+                        refsWrap.appendChild(refsOl);
+                        resultItem.appendChild(refsWrap);
                     }
-                    
-                    resultItem.innerHTML = `
-                        <h4>问题 ${index + 1}: ${data.questions[index]}</h4>
-                        <div class="batch-answer">${formattedAnswer}</div>
-                        ${refsHtml}
-                    `;
                 }
                 
                 batchResultsContainer.appendChild(resultItem);
             });
         })
         .catch(error => {
-            batchResultsContainer.innerHTML = `<p style="color: red;">请求失败：${error.message}</p>`;
+            batchResultsContainer.textContent = `请求失败：${error.message}`;
         });
     });
 }
@@ -286,10 +298,10 @@ function setupBatchQuery() {
 // 添加引用角标
 function addCitationMarkers(answer, citations) {
     if (!citations || citations.length === 0) {
-        return answer;
+        return formatAnswerHtml(answer);
     }
     
-    let result = answer;
+    let result = formatAnswerHtml(answer);
     let citationMap = new Map();
     
     // 构建引用映射
@@ -359,11 +371,21 @@ function loadHistory() {
         // 截取答案预览
         const answerPreview = record.answer.length > 100 ? record.answer.substring(0, 100) + '...' : record.answer;
         
-        historyItem.innerHTML = `
-            <div class="history-query">${record.query}</div>
-            <div class="history-time">${formattedTime}</div>
-            <div class="history-answer">${answerPreview}</div>
-        `;
+        const queryDiv = document.createElement('div');
+        queryDiv.className = 'history-query';
+        queryDiv.textContent = record.query;
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'history-time';
+        timeDiv.textContent = formattedTime;
+
+        const answerDiv = document.createElement('div');
+        answerDiv.className = 'history-answer';
+        answerDiv.textContent = answerPreview;
+
+        historyItem.appendChild(queryDiv);
+        historyItem.appendChild(timeDiv);
+        historyItem.appendChild(answerDiv);
         
         // 点击历史记录重新加载问题
         historyItem.addEventListener('click', () => {

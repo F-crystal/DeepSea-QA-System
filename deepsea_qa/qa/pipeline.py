@@ -50,9 +50,8 @@ class QAPipeline:
         self.llm_model = llm_model
         self.cfg = cfg or QAPipelineConfig()
 
-    def run(self, query: str) -> Dict[str, Any]:
-        # 1) query -> query_bundle
-        qb = build_query_bundle_sync(
+    def _build_query_bundle(self, query: str) -> Dict[str, Any]:
+        return build_query_bundle_sync(
             query=query,
             llm_provider=self.llm_provider,
             llm_model=self.llm_model,
@@ -62,9 +61,9 @@ class QAPipeline:
             cls_strategy="llm",  # 强制使用LLM分类
         )
 
-        # 2) query_bundle -> retrieval_result (server)
-        rr = retrieve_chunks_sync(
-            query_bundle=qb,
+    def _retrieve(self, query_bundle: Dict[str, Any]) -> Dict[str, Any]:
+        return retrieve_chunks_sync(
+            query_bundle=query_bundle,
             final_top_n=self.cfg.final_top_n,
             return_evidence=True,      # 生成阶段需要 evidence
             return_debug=self.cfg.return_debug,
@@ -72,11 +71,17 @@ class QAPipeline:
             timeout=300,
         )
 
-        # 3) generation + verification loop
-        out = generate_answer_sync(
+    def _generate_final(
+        self,
+        query: str,
+        query_bundle: Dict[str, Any],
+        retrieval_result: Dict[str, Any],
+        draft_answer: str = "",
+    ) -> Dict[str, Any]:
+        return generate_answer_sync(
             query=query,
-            query_bundle=qb,
-            retrieval_result=rr,
+            query_bundle=query_bundle,
+            retrieval_result=retrieval_result,
             llm_provider=self.llm_provider,
             llm_model=self.llm_model,
             max_evidence=self.cfg.max_evidence,
@@ -84,7 +89,13 @@ class QAPipeline:
             final_top_n=self.cfg.final_top_n,
             enable_reverse_verification=self.cfg.enable_reverse_verification,
             enable_rerank=self.cfg.enable_rerank,
+            draft_answer=draft_answer,
         )
+
+    def run(self, query: str) -> Dict[str, Any]:
+        qb = self._build_query_bundle(query)
+        rr = self._retrieve(qb)
+        out = self._generate_final(query, qb, rr)
 
         return {
             "query": query,
@@ -100,23 +111,9 @@ class QAPipeline:
           - 然后产出 generation 的 evidence/answer_delta 事件
           - 最后产出 final（完整结构化结果）
         """
-        qb = build_query_bundle_sync(
-            query=query,
-            llm_provider=self.llm_provider,
-            llm_model=self.llm_model,
-            cls_strategy="llm",  # 强制使用LLM分类
-            enable_classification=self.cfg.enable_classification,
-            enable_rewrite_expand=self.cfg.enable_rewrite_expand,
-            max_sparse_queries=self.cfg.max_sparse_queries,
-        )
-
-        rr = retrieve_chunks_sync(
-            query_bundle=qb,
-            final_top_n=self.cfg.final_top_n,
-            return_evidence=True,
-            return_debug=self.cfg.return_debug,
-            timeout=300,
-        )
+        qb = self._build_query_bundle(query)
+        rr = self._retrieve(qb)
+        draft_parts = []
 
         # streaming：证据卡片 + LLM 增量输出
         for ev in stream_generation_events(
@@ -126,8 +123,10 @@ class QAPipeline:
             llm_model=self.llm_model,
             max_evidence=self.cfg.max_evidence,
         ):
+            if ev.get("event") == "answer_delta":
+                draft_parts.append(str(ev.get("delta", "")))
             yield ev
 
         # 最终结构化答案（含验证/引用/必要时二检重答）
-        final = self.run(query)
+        final = self._generate_final(query, qb, rr, draft_answer="".join(draft_parts))
         yield {"event": "final", "data": final}

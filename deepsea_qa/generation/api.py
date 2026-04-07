@@ -44,6 +44,7 @@ def generate_answer_sync(
     final_top_n: int = 10,
     enable_reverse_verification: bool = True,
     enable_rerank: bool = True,
+    draft_answer: Optional[str] = None,
 ) -> Dict[str, Any]:
     pipe = GenerationPipeline(
         llm_settings=LLMSettings(provider=llm_provider, model=llm_model),
@@ -55,5 +56,10 @@ def generate_answer_sync(
         ),
         enable_rerank=enable_rerank,
     )
-    res = pipe.run(query=query, query_bundle=query_bundle, retrieval_result=retrieval_result)
+    res = pipe.run(
+        query=query,
+        query_bundle=query_bundle,
+        retrieval_result=retrieval_result,
+        draft_answer=draft_answer,
+    )
     return res.to_dict()
