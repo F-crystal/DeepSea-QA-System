@@ -182,7 +182,7 @@ python -m deepsea_qa.run.run_eval_pipeline \
 
 #### 文件说明
 
-- **ablation\_analysis.py**：统一执行消融实验结果的字段探测、标准化、总体汇总、Full 对比、A1 分类补充分析和 A2/A3 分领域 THELMA 分析
+- **ablation\_analysis.py**：执行消融实验结果分析
 - **analyze\_correlation.py**：分析评估指标之间的相关性
 - **analyze\_domain\_confusion.py**：分析领域分类混淆矩阵
 - **analyze\_domain\_metrics.py**：分析各领域的评估指标
