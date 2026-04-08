@@ -92,6 +92,7 @@ AGGREGATION_METRICS = {
     "ROUGE-1": "rouge_1_f1",
     "ROUGE-L": "rouge_l_f1",
     "BERTScore": "bert_score_f1",
+    "Answer Length": "answer_length",
     "SP_1": "source_precision_sp1",
     "SP_2": "source_precision_sp2",
     "SQC": "source_query_coverage",
