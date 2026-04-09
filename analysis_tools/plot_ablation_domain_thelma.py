@@ -44,12 +44,14 @@ matplotlib.rcParams.update({
 })
 
 
+# Adapted from publication-oriented qualitative palettes (Paul Tol / scientific figure style),
+# while keeping GLM/Full fixed to the user's established orange-red.
 BAR_COLORS = {
-    'Full': '#808080',
-    'A2': '#3B87C7',
-    'A3': '#F17256',
-    'A4': '#69BD44',
-    'A6': '#9B6BD3',
+    'Full': '#F17256',
+    'A2': '#3F7F93',
+    'A3': '#E0B43B',
+    'A4': '#44AA99',
+    'A6': '#332288',
 }
 
 DOMAIN_ORDER = [
