@@ -63,9 +63,6 @@ Thumbs.db
 openspec/
 .codex/
 
-# Specific files to ignore
-create_ablation_dataset.py
-
 # Config files with sensitive information
 config/api_keys.py
 
