@@ -16,6 +16,11 @@ import matplotlib.pyplot as plt
 import os
 import matplotlib
 
+BASE_FONT_SIZE = 10.5
+LABEL_FONT_SIZE = 11
+SUBPLOT_TITLE_SIZE = 12.5
+TICK_FONT_SIZE = 10.5
+LEGEND_FONT_SIZE = 10.5
 
 # 颜色配置（低饱和度）
 model_colors = {
@@ -28,7 +33,7 @@ model_colors = {
 matplotlib.rcParams.update({
     'font.sans-serif': ['Songti SC', 'STSong', 'SimSun', 'Arial Unicode MS'],
     'axes.unicode_minus': False,
-    'font.size': 10,
+    'font.size': BASE_FONT_SIZE,
     'pdf.fonttype': 42,
     'ps.fonttype': 42,
 })
@@ -96,9 +101,10 @@ for flier in box['fliers']:
     flier.set(marker='o', color='#999999', alpha=0.5)
 
 # 设置图表属性
-ax.set_ylabel('长度')
+ax.set_ylabel('长度', fontsize=LABEL_FONT_SIZE)
 # ax.set_title('不同模型的回答长度分布对比')
 ax.grid(axis='y', linestyle='--', alpha=0.7)
+ax.tick_params(axis='both', labelsize=TICK_FONT_SIZE)
 
 # 保存图表
 output_image = os.path.join(pic_dir, 'length_comparison_boxplot.svg')
@@ -165,15 +171,16 @@ for i, (group_name, metrics) in enumerate(thelma_metrics.items()):
         ax.bar(x + j * bars_width, values, width=bars_width, label=model, color=model_colors[model])
     
     # 设置子图属性
-    ax.set_xlabel('指标')
-    ax.set_ylabel('得分')
-    ax.set_title(f'({chr(97+i)}) {group_name}', fontsize=12)
+    ax.set_xlabel('指标', fontsize=LABEL_FONT_SIZE)
+    ax.set_ylabel('得分', fontsize=LABEL_FONT_SIZE)
+    ax.set_title(f'({chr(97+i)}) {group_name}', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
     ax.set_xticks(x + bars_width)
-    ax.set_xticklabels(group_metrics)
+    ax.set_xticklabels(group_metrics, fontsize=TICK_FONT_SIZE)
+    ax.tick_params(axis='y', labelsize=TICK_FONT_SIZE)
     ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 # 添加图例
-axes[0].legend()
+axes[0].legend(fontsize=LEGEND_FONT_SIZE)
 
 # 调整布局
 plt.tight_layout()
@@ -218,12 +225,13 @@ for i, model in enumerate(models):
     ax3.bar(x + i * bars_width, values, width=bars_width, label=model, color=model_colors[model])
 
 # 设置图表属性
-ax3.set_xlabel('指标')
-ax3.set_ylabel('得分')
+ax3.set_xlabel('指标', fontsize=LABEL_FONT_SIZE)
+ax3.set_ylabel('得分', fontsize=LABEL_FONT_SIZE)
 # ax3.set_title('不同模型的领域分类准确性指标对比')
 ax3.set_xticks(x + bars_width)
-ax3.set_xticklabels(metrics)
-ax3.legend()
+ax3.set_xticklabels(metrics, fontsize=TICK_FONT_SIZE)
+ax3.tick_params(axis='y', labelsize=TICK_FONT_SIZE)
+ax3.legend(fontsize=LEGEND_FONT_SIZE)
 ax3.grid(axis='y', linestyle='--', alpha=0.7)
 
 # 调整布局

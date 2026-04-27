@@ -11,6 +11,11 @@ import matplotlib.pyplot as plt
 import os
 import matplotlib
 
+BASE_FONT_SIZE = 10.5
+LABEL_FONT_SIZE = 11
+TICK_FONT_SIZE = 10.5
+LEGEND_FONT_SIZE = 10.5
+
 # 颜色配置
 model_colors = {
     'GLM': '#F17256',   # 橙红（主模型）
@@ -22,7 +27,7 @@ model_colors = {
 matplotlib.rcParams.update({
     'font.sans-serif': ['Songti SC', 'STSong', 'SimSun', 'Arial Unicode MS'],
     'axes.unicode_minus': False,
-    'font.size': 10,
+    'font.size': BASE_FONT_SIZE,
     'pdf.fonttype': 42,
     'ps.fonttype': 42,
 })
@@ -126,12 +131,13 @@ for i, model in enumerate(models):
     ax.bar(x + i * bars_width, values, width=bars_width, label=model, color=model_colors[model])
 
 # 设置图表属性
-ax.set_xlabel('领域')
-ax.set_ylabel('加权分数')
+ax.set_xlabel('领域', fontsize=LABEL_FONT_SIZE)
+ax.set_ylabel('加权分数', fontsize=LABEL_FONT_SIZE)
 # ax.set_title('不同模型在各领域的加权分数对比')
 ax.set_xticks(x + bars_width)
-ax.set_xticklabels(domains)
-ax.legend()
+ax.set_xticklabels(domains, fontsize=TICK_FONT_SIZE)
+ax.tick_params(axis='y', labelsize=TICK_FONT_SIZE)
+ax.legend(fontsize=LEGEND_FONT_SIZE)
 ax.grid(axis='y', linestyle='--', alpha=0.7)
 
 # 调整布局
