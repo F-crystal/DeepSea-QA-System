@@ -61,7 +61,9 @@ Thumbs.db
 
 # agent files
 openspec/
+awesome-ai-research-writing/
 .codex/
+.tmp-skill-src/
 
 # Config files with sensitive information
 config/api_keys.py

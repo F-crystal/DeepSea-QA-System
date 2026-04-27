@@ -12,6 +12,12 @@ import os
 import matplotlib
 from scipy.stats import pearsonr
 
+BASE_FONT_SIZE = 10.5
+LABEL_FONT_SIZE = 11
+SUBPLOT_TITLE_SIZE = 12.5
+ANNOTATION_FONT_SIZE = 11
+TICK_FONT_SIZE = 10.5
+
 # 颜色配置
 model_colors = {
     'GLM': '#F17256',   # 橙红（主模型）
@@ -23,7 +29,7 @@ model_colors = {
 matplotlib.rcParams.update({
     'font.sans-serif': ['Songti SC', 'STSong', 'SimSun', 'Arial Unicode MS'],
     'axes.unicode_minus': False,
-    'font.size': 10,
+    'font.size': BASE_FONT_SIZE,
     'pdf.fonttype': 42,
     'ps.fonttype': 42,
 })
@@ -78,50 +84,54 @@ fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10))
 
 # 绘制SP1与RSD的散点图
 ax1.scatter(sp1, rsd, alpha=0.5, s=30)
-ax1.set_xlabel('SP1')
-ax1.set_ylabel('RSD')
-ax1.set_title('SP1与RSD的相关性')
+ax1.set_xlabel('SP1', fontsize=LABEL_FONT_SIZE)
+ax1.set_ylabel('RSD', fontsize=LABEL_FONT_SIZE)
+ax1.set_title('(a) SP1与RSD的相关性', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
+ax1.tick_params(axis='both', labelsize=TICK_FONT_SIZE)
 ax1.grid(linestyle='--', alpha=0.7)
 
 # 标注相关系数
 ax1.text(0.05, 0.05, f'Pearson相关系数: r = {corr_sp1_rsd:.3f}', 
-         transform=ax1.transAxes, fontsize=12, 
+         transform=ax1.transAxes, fontsize=ANNOTATION_FONT_SIZE, 
          bbox=dict(boxstyle='round', alpha=0.1))
 
 # 绘制SP1与RP的散点图
 ax2.scatter(sp1, rp, alpha=0.5, s=30)
-ax2.set_xlabel('SP1')
-ax2.set_ylabel('RP')
-ax2.set_title('SP1与RP的相关性')
+ax2.set_xlabel('SP1', fontsize=LABEL_FONT_SIZE)
+ax2.set_ylabel('RP', fontsize=LABEL_FONT_SIZE)
+ax2.set_title('(b) SP1与RP的相关性', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
+ax2.tick_params(axis='both', labelsize=TICK_FONT_SIZE)
 ax2.grid(linestyle='--', alpha=0.7)
 
 # 标注相关系数
 ax2.text(0.05, 0.05, f'Pearson相关系数: r = {corr_sp1_rp:.3f}', 
-         transform=ax2.transAxes, fontsize=12, 
+         transform=ax2.transAxes, fontsize=ANNOTATION_FONT_SIZE, 
          bbox=dict(boxstyle='round', alpha=0.1))
 
 # 绘制SP2与RSD的散点图
 ax3.scatter(sp2, rsd, alpha=0.5, s=30)
-ax3.set_xlabel('SP2')
-ax3.set_ylabel('RSD')
-ax3.set_title('SP2与RSD的相关性')
+ax3.set_xlabel('SP2', fontsize=LABEL_FONT_SIZE)
+ax3.set_ylabel('RSD', fontsize=LABEL_FONT_SIZE)
+ax3.set_title('(c) SP2与RSD的相关性', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
+ax3.tick_params(axis='both', labelsize=TICK_FONT_SIZE)
 ax3.grid(linestyle='--', alpha=0.7)
 
 # 标注相关系数
 ax3.text(0.05, 0.05, f'Pearson相关系数: r = {corr_sp2_rsd:.3f}', 
-         transform=ax3.transAxes, fontsize=12, 
+         transform=ax3.transAxes, fontsize=ANNOTATION_FONT_SIZE, 
          bbox=dict(boxstyle='round', alpha=0.1))
 
 # 绘制SP2与RP的散点图
 ax4.scatter(sp2, rp, alpha=0.5, s=30)
-ax4.set_xlabel('SP2')
-ax4.set_ylabel('RP')
-ax4.set_title('SP2与RP的相关性')
+ax4.set_xlabel('SP2', fontsize=LABEL_FONT_SIZE)
+ax4.set_ylabel('RP', fontsize=LABEL_FONT_SIZE)
+ax4.set_title('(d) SP2与RP的相关性', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
+ax4.tick_params(axis='both', labelsize=TICK_FONT_SIZE)
 ax4.grid(linestyle='--', alpha=0.7)
 
 # 标注相关系数
 ax4.text(0.05, 0.05, f'Pearson相关系数: r = {corr_sp2_rp:.3f}', 
-         transform=ax4.transAxes, fontsize=12, 
+         transform=ax4.transAxes, fontsize=ANNOTATION_FONT_SIZE, 
          bbox=dict(boxstyle='round', alpha=0.1))
 
 # 调整布局

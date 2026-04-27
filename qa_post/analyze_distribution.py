@@ -20,6 +20,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from string import ascii_lowercase
 
 matplotlib.rcParams.update({
     'font.sans-serif': ['Songti SC', 'STSong', 'SimSun', 'Arial Unicode MS'],
@@ -43,16 +44,26 @@ JOURNAL_PALETTE = [
 ]
 
 
-def translate_qtype(qtype: str) -> str:
-    qtype_map = {
+def normalize_chart_text(text: str) -> str:
+    """将图中的描述性文本统一为中文，专有代号保留原样。"""
+    if text is None:
+        return '未知'
+
+    normalized = str(text).strip()
+    text_map = {
         'method': '方法',
         'finding': '研究发现',
         'definition': '概念定义',
         'application': '应用场景',
         'limitation': '局限性',
-        'comparison': '比较'
+        'comparison': '比较',
+        'unknown': '未知',
     }
-    return qtype_map.get(qtype.lower().strip(), qtype)
+    return text_map.get(normalized.lower(), normalized)
+
+
+def translate_qtype(qtype: str) -> str:
+    return normalize_chart_text(qtype)
 
 
 def load_dataset(dataset_path) -> list:
@@ -132,7 +143,7 @@ def save_domain_qtype_to_excel(domain_qtype_counter: dict, output_path):
 
 
 def plot_pie_chart(data: dict, title: str, output_path, colors=None):
-    labels = list(data.keys())
+    labels = [normalize_chart_text(label) for label in data.keys()]
     values = list(data.values())
     n = len(labels)
     if colors is None:
@@ -148,20 +159,21 @@ def plot_pie_chart(data: dict, title: str, output_path, colors=None):
         startangle=90,
         colors=colors,
         wedgeprops=dict(linewidth=0.8, edgecolor='white'),
-        pctdistance=0.75,
-        labeldistance=1.15,
+        pctdistance=0.72,
+        labeldistance=1.12,
     )
 
     for t in texts:
-        t.set_fontsize(9)
+        t.set_fontsize(11.5)
         t.set_color('#1a1a1a')
+        t.set_fontweight('semibold')
     for t in autotexts:
-        t.set_fontsize(8)
+        t.set_fontsize(10.5)
         t.set_color('#ffffff')
         t.set_fontweight('bold')
 
     # 标题放在图的底部，完全避开顶部标签
-    ax.set_title(title, fontsize=14, fontweight='bold', color='#1a1a1a',
+    ax.set_title(normalize_chart_text(title), fontsize=13, fontweight='bold', color='#1a1a1a',
                  pad=0, y=-0.08)
 
     plt.tight_layout()
@@ -175,7 +187,7 @@ def plot_subplots_pie_chart(domain_qtype_counter: dict, title: str, output_path)
     n_domains = len(domains)
 
     all_qtypes = sorted({qt for c in domain_qtype_counter.values() for qt in c})
-    color_map = {qt: JOURNAL_PALETTE[i % len(JOURNAL_PALETTE)]
+    color_map = {normalize_chart_text(qt): JOURNAL_PALETTE[i % len(JOURNAL_PALETTE)]
                  for i, qt in enumerate(all_qtypes)}
 
     ncols = 2
@@ -189,7 +201,7 @@ def plot_subplots_pie_chart(domain_qtype_counter: dict, title: str, output_path)
         ax = axes[i]
         ax.set_facecolor('white')
         qtype_counter = domain_qtype_counter[domain]
-        labels = list(qtype_counter.keys())
+        labels = [normalize_chart_text(label) for label in qtype_counter.keys()]
         values = list(qtype_counter.values())
         colors = [color_map[lb] for lb in labels]
 
@@ -200,29 +212,31 @@ def plot_subplots_pie_chart(domain_qtype_counter: dict, title: str, output_path)
             startangle=90,
             colors=colors,
             wedgeprops=dict(linewidth=0.8, edgecolor='white'),
-            pctdistance=0.75,
-            labeldistance=1.15,
+            pctdistance=0.70,
+            labeldistance=1.08,
         )
 
         for t in texts:
-            t.set_fontsize(9)
+            t.set_fontsize(11)
             t.set_color('#1a1a1a')
+            t.set_fontweight('semibold')
         for t in autotexts:
-            t.set_fontsize(8)
+            t.set_fontsize(10.5)
             t.set_color('#ffffff')
             t.set_fontweight('bold')
 
-        # 子图标题放底部
-        ax.set_title(domain, fontsize=12, fontweight='bold',
-                     color='#1a1a1a', pad=0, y=-0.06)
+        # 多分图按 (a)(b)(c) 编号，并给出分图名
+        subplot_label = ascii_lowercase[i]
+        subplot_title = f"({subplot_label}) {normalize_chart_text(domain)}"
+        ax.set_title(subplot_title, fontsize=12, fontweight='bold',
+                     color='#1a1a1a', pad=6, y=1.00)
 
     for i in range(n_domains, len(axes)):
         axes[i].set_visible(False)
 
-    # 总标题放底部
-    #fig.text(0.5, 0.01, title, ha='center', va='bottom', fontsize=14, fontweight='bold', color='#1a1a1a')
+    # fig.text(0.5, 0.02, normalize_chart_text(title), ha='center', va='bottom', fontsize=13.5, fontweight='bold', color='#1a1a1a')
 
-    plt.tight_layout(rect=[0, 0.04, 1, 1])
+    plt.tight_layout(rect=[0, 0.02, 1, 1])
     plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
     plt.close()
     print(f"  ✓ 已保存: {output_path}")

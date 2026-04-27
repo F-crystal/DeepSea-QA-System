@@ -15,6 +15,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+BASE_FONT_SIZE = 10.5
+LABEL_FONT_SIZE = 11
+SUBPLOT_TITLE_SIZE = 12.5
+TICK_FONT_SIZE = 10.5
+LEGEND_FONT_SIZE = 10.5
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -38,7 +43,7 @@ from analysis_tools.ablation_analysis import (
 matplotlib.rcParams.update({
     'font.sans-serif': ['Songti SC', 'STSong', 'SimSun', 'Arial Unicode MS'],
     'axes.unicode_minus': False,
-    'font.size': 10,
+    'font.size': BASE_FONT_SIZE,
     'pdf.fonttype': 42,
     'ps.fonttype': 42,
 })
@@ -191,17 +196,18 @@ def render_plot(plot_domains, plot_data, group_ids, output_path):
                 alpha=0.85,
             )
 
-        ax.set_title(domain, fontsize=12)
+        ax.set_title(f'({chr(97 + index)}) {domain}', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
         ax.set_xticks(x)
-        ax.set_xticklabels(METRIC_LABELS)
+        ax.set_xticklabels(METRIC_LABELS, fontsize=TICK_FONT_SIZE)
+        ax.tick_params(axis='y', labelsize=TICK_FONT_SIZE)
         ax.set_ylim(0, 1.05)
         ax.grid(axis='y', linestyle='--', alpha=0.6)
 
-    axes[0].set_ylabel('得分')
-    axes[2].set_ylabel('得分')
-    axes[2].set_xlabel('指标')
-    axes[3].set_xlabel('指标')
-    axes[0].legend(loc='upper left')
+    axes[0].set_ylabel('得分', fontsize=LABEL_FONT_SIZE)
+    axes[2].set_ylabel('得分', fontsize=LABEL_FONT_SIZE)
+    axes[2].set_xlabel('指标', fontsize=LABEL_FONT_SIZE)
+    axes[3].set_xlabel('指标', fontsize=LABEL_FONT_SIZE)
+    axes[0].legend(loc='upper left', fontsize=LEGEND_FONT_SIZE)
 
     plt.tight_layout()
     plt.savefig(output_path, format='svg', dpi=600)

@@ -12,6 +12,12 @@ import seaborn as sns
 import os
 import matplotlib
 
+BASE_FONT_SIZE = 10.5
+LABEL_FONT_SIZE = 11
+SUBPLOT_TITLE_SIZE = 12.5
+TICK_FONT_SIZE = 10.5
+LEGEND_FONT_SIZE = 10.5
+
 # 颜色配置
 model_colors = {
     'GLM': '#F17256',   # 橙红（主模型）
@@ -23,7 +29,7 @@ model_colors = {
 matplotlib.rcParams.update({
     'font.sans-serif': ['Songti SC', 'STSong', 'SimSun', 'Arial Unicode MS'],
     'axes.unicode_minus': False,
-    'font.size': 10,
+    'font.size': BASE_FONT_SIZE,
     'pdf.fonttype': 42,
     'ps.fonttype': 42,
 })
@@ -65,8 +71,17 @@ def analyze_domain_confusion():
         
         # 绘制混淆矩阵热图
         plt.figure(figsize=(10, 8))
-        sns.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues', cbar=True)
-        plt.title(f'{model_name}模型的领域混淆矩阵')
+        ax = sns.heatmap(
+            confusion_matrix,
+            annot=True,
+            fmt='d',
+            cmap='Blues',
+            cbar=True,
+            annot_kws={'fontsize': 10.5},
+        )
+        ax.set_xlabel('预测领域', fontsize=LABEL_FONT_SIZE)
+        ax.set_ylabel('真实领域', fontsize=LABEL_FONT_SIZE)
+        ax.tick_params(axis='both', labelsize=TICK_FONT_SIZE)
         plt.tight_layout()
         
         # 保存图表
@@ -161,16 +176,17 @@ def plot_error_analysis():
             
             ax.bar(x + j * bar_width, values, width=bar_width, label=model_name, color=model_colors[model_name])
         
-        ax.set_title(f'真实领域: {domain}')
-        ax.set_ylabel('误判率')
+        ax.set_title(f'({chr(97+i)}) 真实领域：{domain}', fontsize=SUBPLOT_TITLE_SIZE, fontweight='bold', pad=8)
+        ax.set_ylabel('误判率', fontsize=LABEL_FONT_SIZE)
         ax.set_ylim(0, 0.3)  # 设置统一的y轴范围
         ax.set_xticks(x + bar_width)  # 调整x轴标签位置
-        ax.set_xticklabels(all_pred_domains, rotation=0, ha='center')
+        ax.set_xticklabels(all_pred_domains, rotation=0, ha='center', fontsize=TICK_FONT_SIZE)
+        ax.tick_params(axis='y', labelsize=TICK_FONT_SIZE)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
     
     # 添加统一的图例到右侧
     handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='center right', bbox_to_anchor=(1.02, 0.5))
+    fig.legend(handles, labels, loc='center right', bbox_to_anchor=(1.02, 0.5), fontsize=LEGEND_FONT_SIZE)
     
     plt.tight_layout(rect=[0, 0, 0.95, 1])  # 为图例留出空间
     
