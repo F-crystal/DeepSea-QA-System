@@ -36,7 +36,7 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Data files (隐私数据不上传)
+# Data files
 *.md
 *.jsonl
 *.json
@@ -68,7 +68,7 @@ awesome-ai-research-writing/
 # Config files with sensitive information
 config/api_keys.py
 
-# Output directories (保留代码文件)
+# Output directories 
 qa_dataset_out/*.jsonl
 qa_dataset_out/*.json
 qa_dataset_out/*.xlsx
